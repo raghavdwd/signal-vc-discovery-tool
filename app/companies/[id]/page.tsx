@@ -215,10 +215,12 @@ export default function CompanyProfilePage() {
         )
         .slice(0, 6);
 
+    const enableMemo = process.env.NEXT_PUBLIC_ENABLE_MEMO === "true";
+
     const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
         { id: "overview", label: "Overview", icon: Globe },
         { id: "intelligence", label: "AI Intelligence", icon: Sparkles },
-        { id: "memo", label: "Investment Memo", icon: FileText },
+        ...(enableMemo ? [{ id: "memo" as Tab, label: "Investment Memo", icon: FileText }] : []),
         { id: "chat", label: "Ask AI", icon: MessageSquare },
         { id: "notes", label: "Notes", icon: StickyNote },
         { id: "similar", label: "Similar", icon: Building2 },
@@ -276,14 +278,16 @@ export default function CompanyProfilePage() {
                             {isEnriching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Brain className="h-4 w-4" />}
                             AI Enrich
                         </button>
-                        <button
-                            onClick={handleGenerateMemo}
-                            disabled={isMemoGenerating}
-                            className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-4 py-2.5 text-sm font-medium text-primary hover:bg-primary/10 transition-colors disabled:opacity-50"
-                        >
-                            {isMemoGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}
-                            Generate Memo
-                        </button>
+                        {enableMemo && (
+                            <button
+                                onClick={handleGenerateMemo}
+                                disabled={isMemoGenerating}
+                                className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-4 py-2.5 text-sm font-medium text-primary hover:bg-primary/10 transition-colors disabled:opacity-50"
+                            >
+                                {isMemoGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}
+                                Generate Memo
+                            </button>
+                        )}
                         <div className="relative">
                             <button
                                 onClick={() => setShowListPicker(!showListPicker)}
