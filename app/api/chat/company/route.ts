@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getGenAI, getModel } from "@/lib/gemini/client";
 
+export const runtime = "edge";
+
 // ============================================================
 // POST /api/chat/company
 // Chat with company data — RAG-style Q&A with Gemini

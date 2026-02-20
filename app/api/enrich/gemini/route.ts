@@ -5,6 +5,8 @@ import {
     type GeminiEnrichmentData,
 } from "@/lib/gemini/schemas";
 
+export const runtime = "edge";
+
 // ============================================================
 // POST /api/enrich/gemini
 // AI-powered company enrichment using Gemini structured output

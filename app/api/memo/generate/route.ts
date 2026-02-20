@@ -5,6 +5,8 @@ import {
     type GeminiMemoData,
 } from "@/lib/gemini/schemas";
 
+export const runtime = "edge";
+
 // ============================================================
 // POST /api/memo/generate
 // Deep investment memo generation using Gemini Pro

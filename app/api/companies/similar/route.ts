@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getGenAI, getModel } from "@/lib/gemini/client";
 import { SIMILAR_COMPANIES_SCHEMA } from "@/lib/gemini/schemas";
 
+export const runtime = "edge";
+
 // ============================================================
 // POST /api/companies/similar
 // Smart similar company matching powered by Gemini
