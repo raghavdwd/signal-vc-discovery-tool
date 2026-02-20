@@ -432,3 +432,127 @@ export const useUIStore = create<UIStore>()(
         }
     )
 );
+
+// ============================================================
+// Settings Store — API Key Management
+// ============================================================
+
+interface SettingsStore {
+    geminiApiKey: string;
+    setGeminiApiKey: (key: string) => void;
+    clearGeminiApiKey: () => void;
+    hasApiKey: () => boolean;
+}
+
+export const useSettingsStore = create<SettingsStore>()(
+    persist(
+        (set, get) => ({
+            geminiApiKey: "",
+
+            setGeminiApiKey: (key) => set({ geminiApiKey: key.trim() }),
+
+            clearGeminiApiKey: () => set({ geminiApiKey: "" }),
+
+            hasApiKey: () => get().geminiApiKey.length > 0,
+        }),
+        { name: "signal-settings" }
+    )
+);
+
+// ============================================================
+// AI Results Store — Cached enrichment, memo, chat per company
+// ============================================================
+
+interface ChatMessage {
+    role: "user" | "model";
+    content: string;
+    timestamp: string;
+}
+
+interface CompanyAIData {
+    enrichment: Record<string, unknown> | null;
+    enrichedAt: string | null;
+    memo: Record<string, unknown> | null;
+    memoGeneratedAt: string | null;
+    chatHistory: ChatMessage[];
+}
+
+interface AIResultsStore {
+    results: Record<string, CompanyAIData>;
+    setEnrichment: (companyId: string, data: Record<string, unknown>) => void;
+    setMemo: (companyId: string, data: Record<string, unknown>) => void;
+    getEnrichment: (companyId: string) => Record<string, unknown> | null;
+    getMemo: (companyId: string) => Record<string, unknown> | null;
+    setChatHistory: (companyId: string, messages: ChatMessage[]) => void;
+    getChatHistory: (companyId: string) => ChatMessage[];
+    clearCompanyData: (companyId: string) => void;
+}
+
+const emptyData: CompanyAIData = {
+    enrichment: null,
+    enrichedAt: null,
+    memo: null,
+    memoGeneratedAt: null,
+    chatHistory: [],
+};
+
+export const useAIResultsStore = create<AIResultsStore>()(
+    persist(
+        (set, get) => ({
+            results: {},
+
+            setEnrichment: (companyId, data) =>
+                set((state) => ({
+                    results: {
+                        ...state.results,
+                        [companyId]: {
+                            ...(state.results[companyId] || emptyData),
+                            enrichment: data,
+                            enrichedAt: new Date().toISOString(),
+                        },
+                    },
+                })),
+
+            setMemo: (companyId, data) =>
+                set((state) => ({
+                    results: {
+                        ...state.results,
+                        [companyId]: {
+                            ...(state.results[companyId] || emptyData),
+                            memo: data,
+                            memoGeneratedAt: new Date().toISOString(),
+                        },
+                    },
+                })),
+
+            getEnrichment: (companyId) =>
+                get().results[companyId]?.enrichment || null,
+
+            getMemo: (companyId) =>
+                get().results[companyId]?.memo || null,
+
+            setChatHistory: (companyId, messages) =>
+                set((state) => ({
+                    results: {
+                        ...state.results,
+                        [companyId]: {
+                            ...(state.results[companyId] || emptyData),
+                            chatHistory: messages,
+                        },
+                    },
+                })),
+
+            getChatHistory: (companyId) =>
+                get().results[companyId]?.chatHistory || [],
+
+            clearCompanyData: (companyId) =>
+                set((state) => ({
+                    results: {
+                        ...state.results,
+                        [companyId]: { ...emptyData },
+                    },
+                })),
+        }),
+        { name: "signal-ai-results" }
+    )
+);

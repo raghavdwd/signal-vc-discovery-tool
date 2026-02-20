@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
@@ -16,9 +17,11 @@ import {
     ChevronLeft,
     ChevronRight,
     Search,
+    Key,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useUIStore, useSignalStore } from "@/lib/stores";
+import { useUIStore, useSignalStore, useSettingsStore } from "@/lib/stores";
+import { ApiKeyModal } from "@/components/settings/api-key-modal";
 
 const NAV_ITEMS = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -34,7 +37,14 @@ export function Sidebar() {
     const { preferences, toggleTheme, toggleSidebar, setCommandPaletteOpen } =
         useUIStore();
     const unreadCount = useSignalStore((s) => s.getUnreadCount());
+    const hasApiKey = useSettingsStore((s) => s.hasApiKey());
     const collapsed = preferences.sidebar_collapsed;
+    const [showApiKeyModal, setShowApiKeyModal] = useState(false);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     return (
         <aside
@@ -116,7 +126,7 @@ export function Sidebar() {
                             {!collapsed && (
                                 <span className="relative">{item.label}</span>
                             )}
-                            {showBadge && (
+                            {mounted && showBadge && (
                                 <span
                                     className={cn(
                                         "relative flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-bold text-primary-foreground",
@@ -133,6 +143,28 @@ export function Sidebar() {
 
             {/* Bottom actions */}
             <div className="border-t border-border p-3 space-y-1">
+                <button
+                    onClick={() => setShowApiKeyModal(true)}
+                    className={cn(
+                        "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-ring",
+                        collapsed && "justify-center px-0"
+                    )}
+                    aria-label="API Key Settings"
+                >
+                    <div className="relative">
+                        <Key className="h-[18px] w-[18px]" />
+                        {mounted && (
+                            <span
+                                className={cn(
+                                    "absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full border border-card",
+                                    hasApiKey ? "bg-emerald-400" : "bg-amber-400"
+                                )}
+                            />
+                        )}
+                    </div>
+                    {!collapsed && <span>API Key</span>}
+                </button>
+
                 <button
                     onClick={toggleTheme}
                     className={cn(
@@ -167,6 +199,8 @@ export function Sidebar() {
                     {!collapsed && <span>Collapse</span>}
                 </button>
             </div>
+
+            <ApiKeyModal open={showApiKeyModal} onClose={() => setShowApiKeyModal(false)} />
         </aside>
     );
 }
